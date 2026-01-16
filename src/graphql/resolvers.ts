@@ -91,7 +91,7 @@ export const resolvers = {
             const orgRefs = uniqueOrgIds.map(id => db.collection("organizations").doc(id));
 
             const orgSnaps = await db.getAll(...orgRefs);
-            return orgSnaps.map(s => ({ id: s.id, ...s.data() }));
+            return orgSnaps.map((s: any) => ({ id: s.id, ...s.data() }));
         },
 
         leads: async (_: any, { status, pagination }: { status?: string, pagination?: any }, ctx: Context) => {
@@ -299,7 +299,7 @@ export const resolvers = {
             const uniqueOrgIds = Array.from(new Set(orgIds));
             const orgRefs = uniqueOrgIds.map(id => db.collection("organizations").doc(id));
             const orgSnaps = await db.getAll(...orgRefs);
-            return orgSnaps.map(s => ({ id: s.id, ...s.data() }));
+            return orgSnaps.map((s: any) => ({ id: s.id, ...s.data() }));
         }
     },
 
