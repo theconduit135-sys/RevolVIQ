@@ -1,8 +1,7 @@
 import * as admin from "firebase-admin";
 
 // Only initialize if not during build (check for runtime)
-const isBuilding = process.env.CI === 'true' || (typeof window === 'undefined' && process.env.NODE_ENV !== 'production');
-if (!admin.apps.length && !isBuilding) {
+const isBuilding = typeof window === 'undefined' && (process.env.CI === 'true' || process.env.NODE_ENV !== 'production' || !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);if (!admin.apps.length && !isBuilding) {
   try {
     // Attempt standard initialization
     admin.initializeApp({
