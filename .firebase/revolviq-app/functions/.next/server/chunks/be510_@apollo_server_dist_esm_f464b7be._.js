@@ -1,3 +1,0 @@
-module.exports=[84340,e=>{"use strict";e.s(["packageVersion",0,"5.2.0"])},48668,e=>{"use strict";var t=e.i(73699);function r(e){let r=e.getType("_Service");if(!(0,t.isObjectType)(r))return!1;let s=r.getFields().sdl;if(!s)return!1;let i=s.type;return(0,t.isNonNullType)(i)&&(i=i.ofType),!!(0,t.isScalarType)(i)&&"String"==i.name}e.s(["schemaIsSubgraph",()=>r])}];
-
-//# sourceMappingURL=be510_%40apollo_server_dist_esm_f464b7be._.js.map
