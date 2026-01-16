@@ -5,6 +5,9 @@ import { resolvers } from "@/graphql/resolvers";
 import { createContext } from "@/graphql/context";
 import { NextRequest } from "next/server";
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
