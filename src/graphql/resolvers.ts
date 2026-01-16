@@ -84,7 +84,7 @@ export const resolvers = {
         organizations: async (_: any, __: any, ctx: Context) => {
             const uid = requireAuth(ctx);
             const memberSnaps = await db.collectionGroup("members").where("uid", "==", uid).get();
-            const orgIds = memberSnaps.docs.map(d => d.data().orgId);
+            const orgIds = memberSnaps.docs.map((d: any) => d.data().orgId);
             if (orgIds.length === 0) return [];
 
             const uniqueOrgIds = Array.from(new Set(orgIds));
@@ -294,7 +294,7 @@ export const resolvers = {
         orgs: async (parent: any) => {
             const uid = parent.uid;
             const memberSnaps = await db.collectionGroup("members").where("uid", "==", uid).get();
-            const orgIds = memberSnaps.docs.map(d => d.data().orgId);
+            const orgIds = memberSnaps.docs.map((d: any) => d.data().orgId);
             if (orgIds.length === 0) return [];
             const uniqueOrgIds = Array.from(new Set(orgIds));
             const orgRefs = uniqueOrgIds.map(id => db.collection("organizations").doc(id));
@@ -306,7 +306,7 @@ export const resolvers = {
     Organization: {
         members: async (parent: any) => {
             const snap = await db.collection("organizations").doc(parent.id).collection("members").get();
-            return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            return snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
         }
     }
 };
