@@ -1,8 +1,7 @@
 import * as admin from "firebase-admin";
 
 // Only initialize if not during build (check for runtime)
-const isBuilding = typeof window === 'undefined' && !process.env.FIREBASE_CONFIG;
-
+const isBuilding = process.env.CI === 'true' || (typeof window === 'undefined' && process.env.NODE_ENV !== 'production');
 if (!admin.apps.length && !isBuilding) {
   try {
     // Attempt standard initialization
