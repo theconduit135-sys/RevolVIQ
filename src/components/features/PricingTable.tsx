@@ -1,6 +1,9 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface PricingTier {
     id: string; // Product ID
@@ -52,10 +55,84 @@ const TIERS: PricingTier[] = [
 ];
 
 export function PricingTable() {
-    const handlePurchase = (tierId: string) => {
-        console.log("Purchase", tierId);
-        // TODO: Call createOrder mutation
-        // window.location.href = data.createOrder.stripeCheckoutUrl
+    const { user } = useAuth();
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+
+    const handlePurchase = async (tierId: string) => {
+        if (!user) {
+            router.push("/login?redirect=/dashboard");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // 1. Get Viewer Org
+            const viewerRes = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": user ? `Bearer ${await user.getIdToken()}` : ""
+                },
+                body: JSON.stringify({
+                    query: `query GetViewer { viewer { orgs { id } } }`
+                })
+            });
+            const viewerJson = await viewerRes.json();
+            const orgId = viewerJson.data?.viewer?.orgs?.[0]?.id;
+
+            if (!orgId) {
+                alert("You need to create an Organization/Business profile before purchasing.");
+                router.push("/dashboard");
+                setLoading(false);
+                return;
+            }
+
+            // 2. Create Order
+            const orderRes = await fetch("/api/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": user ? `Bearer ${await user.getIdToken()}` : ""
+                },
+                body: JSON.stringify({
+                    query: `
+                        mutation CreateOrder($input: JSON!) {
+                            createOrder(input: $input) {
+                                stripeCheckoutUrl
+                            }
+                        }
+                    `,
+                    variables: {
+                        input: {
+                            orgId,
+                            items: [{ productId: tierId, quantity: 1 }],
+                            successUrl: `${window.location.origin}/dashboard?success=true`,
+                            cancelUrl: `${window.location.origin}/?canceled=true`
+                        }
+                    }
+                })
+            });
+            const orderJson = await orderRes.json();
+
+            if (orderJson.errors) {
+                throw new Error(orderJson.errors[0].message);
+            }
+
+            const checkoutUrl = orderJson.data?.createOrder?.stripeCheckoutUrl;
+            if (checkoutUrl) {
+                window.location.href = checkoutUrl;
+            } else {
+                throw new Error("No URL returned");
+            }
+
+        } catch (e: any) {
+            console.error(e);
+            alert("Checkout Failed: " + e.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -89,12 +166,14 @@ export function PricingTable() {
 
                     <button
                         onClick={() => handlePurchase(tier.id)}
+                        disabled={loading}
                         className={`w-full py-3 rounded-lg font-bold transition-all
                 ${tier.recommended
                                 ? "bg-gold-500 hover:bg-gold-600 text-midnight-900 shadow-lg shadow-gold-500/20"
-                                : "bg-midnight-900 hover:bg-slate-800 text-white border border-slate-700"}`}
+                                : "bg-midnight-900 hover:bg-slate-800 text-white border border-slate-700"}
+                ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
-                        Get Started
+                        {loading ? "Processing..." : "Get Started"}
                     </button>
                 </div>
             ))}

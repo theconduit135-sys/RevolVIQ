@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: "Automated underwriting analysis and capital packaging.",
 };
 
+import { Providers } from "@/components/providers/Providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,14 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} min-h-screen bg-background antialiased`}>
-        <AuthProvider>
+        <Providers>
           <div className="relative min-h-screen flex flex-col">
             {children}
           </div>
 
           {/* Persistent Panic Button */}
           <PanicButton currentTier="DIY" />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
