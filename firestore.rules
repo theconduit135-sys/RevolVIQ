@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+
+    function hasAccountClaim() {
+      return isSignedIn()
+        && request.auth.token.accountId is string
+        && request.auth.token.accountId.size() > 0;
+    }
+
+    function accountId() { return request.auth.token.accountId; }
+    function isServer() { return isSignedIn() && request.auth.token.isServer == true; }
+
+    function userSafeUpdateOnly() {
+      return request.resource.data.diff(resource.data).changedKeys()
+        .hasOnly(["displayName","photoURL","updatedAt"]);
+    }
+
+    function sameAccountDoc() {
+      return hasAccountClaim() && resource.data.accountId == accountId();
+    }
+
+    function sameAccountNewDoc() {
+      return hasAccountClaim() && request.resource.data.accountId == accountId();
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && userId == uid();
+      allow create: if isSignedIn()
+        && userId == uid()
+        && (!("accountId" in request.resource.data) || request.resource.data.accountId == accountId());
+      allow update: if isSignedIn() && userId == uid() && userSafeUpdateOnly();
+      allow delete: if false;
+    }
+
+    match /accounts/{acctId} {
+      allow read: if hasAccountClaim() && acctId == accountId();
+      allow create, update, delete: if isServer();
+    }
+
+    match /businesses/{businessId} {
+      allow read: if isSignedIn() && sameAccountDoc();
+      allow create, update, delete: if isServer();
+    }
+
+    match /uploads/{uploadId} {
+      allow read: if isSignedIn()
+        && resource.data.uid == uid()
+        && sameAccountDoc();
+
+      allow create: if isSignedIn()
+        && sameAccountNewDoc()
+        && request.resource.data.uid == uid()
+        && request.resource.data.status == "QUEUED"
+        && request.resource.data.fileName is string
+        && request.resource.data.contentType == "application/pdf"
+        && request.resource.data.storagePath is string
+        && request.resource.data.createdAt is timestamp;
+
+      allow update, delete: if isServer();
+    }
+
+    match /scans/{scanId} {
+      allow read: if isSignedIn()
+        && sameAccountDoc()
+        && resource.data.uid == uid();
+      allow create, update, delete: if isServer();
+    }
+
+    match /pledgeboost/{userId} {
+      allow read: if isSignedIn() && userId == uid();
+      allow create, update: if isSignedIn()
+        && userId == uid()
+        && (!("accountId" in request.resource.data) || request.resource.data.accountId == accountId())
+        && request.resource.data.loanAmount is int
+        && request.resource.data.prepayPct is number
+        && request.resource.data.termMonths is int
+        && request.resource.data.termMonths >= 6
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
+
+    match /knowledgeBase/{docId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isServer();
+    }
+
+    match /billingEvents/{eventId} {
+      allow read: if isSignedIn() && sameAccountDoc() && resource.data.uid == uid();
+      allow create, update, delete: if isServer();
+    }
+
+    match /purchases/{purchaseId} {
+      allow read: if isSignedIn() && sameAccountDoc() && resource.data.uid == uid();
+      allow create, update, delete: if isServer();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

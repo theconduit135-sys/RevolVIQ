@@ -1,0 +1,103 @@
+"use client";
+
+import { Check } from "lucide-react";
+
+interface PricingTier {
+    id: string; // Product ID
+    name: string;
+    price: number;
+    features: string[];
+    recommended?: boolean;
+    type: "DIY" | "DWY" | "DFY";
+}
+
+const TIERS: PricingTier[] = [
+    {
+        id: "DIY_FULL",
+        name: "DIY Plan",
+        type: "DIY",
+        price: 497,
+        features: [
+            "Lifetime Platform Access",
+            "Unlimited Underwriting Scans",
+            "PledgeBoost™ Strategy",
+            "SBA Gatekeeper™"
+        ]
+    },
+    {
+        id: "DWY_FULL",
+        name: "Do-It-With-You",
+        type: "DWY",
+        price: 747,
+        features: [
+            "Everything in DIY",
+            "Priority Email Support",
+            "Packaged Application Review",
+            "Klarna Financing Available"
+        ]
+    },
+    {
+        id: "DFY_FULL",
+        name: "Do-It-For-You",
+        type: "DFY",
+        price: 997,
+        recommended: true,
+        features: [
+            "Everything in DWY",
+            "Hands-on Capital Packaging",
+            "Dedicated Account Manager",
+            "Lender Match Introduction"
+        ]
+    }
+];
+
+export function PricingTable() {
+    const handlePurchase = (tierId: string) => {
+        console.log("Purchase", tierId);
+        // TODO: Call createOrder mutation
+        // window.location.href = data.createOrder.stripeCheckoutUrl
+    };
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {TIERS.map((tier) => (
+                <div
+                    key={tier.type}
+                    className={`relative bg-midnight-800 border rounded-2xl p-6 shadow-xl flex flex-col
+                ${tier.recommended ? "border-gold-500 shadow-gold-500/20 scale-105 z-10" : "border-midnight-700"}`}
+                >
+                    {tier.recommended && (
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold-500 text-midnight-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                            Most Popular
+                        </div>
+                    )}
+
+                    <div className="text-center mb-6 space-y-2">
+                        <h3 className="text-lg font-bold text-white">{tier.name}</h3>
+                        <div className="text-3xl font-bold text-gold-500">${tier.price}</div>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest">One-Time • Lifetime</p>
+                    </div>
+
+                    <ul className="space-y-4 mb-8 flex-1">
+                        {tier.features.map((feat, i) => (
+                            <li key={i} className="flex items-start gap-3 text-sm text-slate-300">
+                                <Check size={16} className="text-gold-500 shrink-0 mt-0.5" />
+                                <span>{feat}</span>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <button
+                        onClick={() => handlePurchase(tier.id)}
+                        className={`w-full py-3 rounded-lg font-bold transition-all
+                ${tier.recommended
+                                ? "bg-gold-500 hover:bg-gold-600 text-midnight-900 shadow-lg shadow-gold-500/20"
+                                : "bg-midnight-900 hover:bg-slate-800 text-white border border-slate-700"}`}
+                    >
+                        Get Started
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}

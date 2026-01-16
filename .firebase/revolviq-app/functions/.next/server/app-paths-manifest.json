@@ -1,0 +1,10 @@
+{
+  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js",
+  "/(protected)/resources/page": "app/(protected)/resources/page.js",
+  "/(protected)/scan/page": "app/(protected)/scan/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/graphql/route": "app/api/graphql/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

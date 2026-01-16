@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "revolv-80ee0"
+  },
+  "targets": {
+    "revolv-80ee0": {
+      "hosting": {
+        "revolviq": [
+          "revolviq-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
